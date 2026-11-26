@@ -1,0 +1,9 @@
+name: mortgage_analytics
+version: "1.0.0"
+profile: mortgage_analytics
+
+models:
+  mortgage_analytics:
+    staging:
+      # Staging reads the raw text files; tables avoid re-parsing them for every downstream query.
+      +materialized: table
