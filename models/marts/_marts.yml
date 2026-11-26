@@ -44,9 +44,14 @@ models:
         description: Conditional prepayment rate, the annualized SMM. 1 - (1 - smm)^12.
 
   - name: risk_band_performance
-    description: One row per origination year, credit score band, and loan-to-value band.
+    description: >-
+      One row per origination year, credit score band, and loan-to-value band. Rates cover each
+      loan's first 60 months after its first payment, so older and newer origination years are
+      compared over the same window. Loans without 60 months of data yet are left out.
     columns:
-      - name: serious_delinquency_rate
-        description: Share of loans that were ever 90+ days delinquent or in REO.
-      - name: default_rate
-        description: Share of loans whose outcome is defaulted.
+      - name: serious_delinquency_rate_5yr
+        description: Share of loans that were 90+ days delinquent or in REO within 60 months.
+      - name: default_rate_5yr
+        description: >-
+          Share of loans that defaulted within 60 months, dated by when the default was reported
+          (usually the property sale), which comes well after the first missed payment.
