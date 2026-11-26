@@ -58,6 +58,17 @@ models:
       - name: months_to_outcome
         description: Months from the start of the episode to its outcome month.
 
+  - name: delinquency_outcomes
+    description: >-
+      One row per origination year, worst delinquency status reached, and episode outcome.
+      Ongoing episodes are kept as their own outcome rather than counted as cured or defaulted.
+    columns:
+      - name: share_of_episodes
+        description: Share of the origination year's episodes at that worst status that ended this way.
+      - name: median_months_to_outcome
+        description: >-
+          Median months from the start of the episode to its outcome. Null for ongoing episodes.
+
   - name: prepayment_by_vintage
     description: >-
       One row per origination year per month. Prepayment counts only loans paid off in full
