@@ -2,13 +2,15 @@ sources:
   - name: freddie
     description: >-
       Freddie Mac Single-Family Loan-Level Dataset sample files. The files are pipe-delimited with
-      no header row, so column names follow the order in Freddie Mac's file layout.
+      no header row, so column names follow the order in Freddie Mac's file layout. Files are read
+      from data/ by default; set FREDDIE_DATA_DIR=fixtures to run on the fake loans instead.
     tables:
       - name: origination
         description: One row per loan, as of origination.
         config:
           external_location: >-
-            read_csv('data/sample_orig_*.txt', delim = '|', header = false, all_varchar = true,
+            read_csv('{{ env_var("FREDDIE_DATA_DIR", "data") }}/sample_orig_*.txt', delim = '|',
+            header = false, all_varchar = true,
             names = ['credit_score', 'first_payment_date', 'first_time_homebuyer_flag',
             'maturity_date', 'msa', 'mi_pct', 'number_of_units', 'occupancy_status',
             'original_cltv', 'original_dti', 'original_upb', 'original_ltv',
@@ -43,7 +45,8 @@ sources:
         description: One row per loan per month.
         config:
           external_location: >-
-            read_csv('data/sample_perf_*.txt', delim = '|', header = false, all_varchar = true,
+            read_csv('{{ env_var("FREDDIE_DATA_DIR", "data") }}/sample_perf_*.txt', delim = '|',
+            header = false, all_varchar = true,
             names = ['loan_id', 'period', 'current_upb', 'delinquency_status', 'loan_age',
             'remaining_months_to_maturity', 'defect_settlement_date', 'modification_flag',
             'zero_balance_code', 'zero_balance_effective_date', 'current_interest_rate',
