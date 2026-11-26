@@ -1,0 +1,73 @@
+unit_tests:
+  - name: delinquency_episode_outcomes
+    model: fct_delinquency_episodes
+    given:
+      - input: ref('fct_loan_months')
+        rows:
+          # Cures after reaching 60 days.
+          - {loan_id: cured, reporting_month: '2021-01-01', months_delinquent: 0, delinquency_status: current}
+          - {loan_id: cured, reporting_month: '2021-02-01', months_delinquent: 1, delinquency_status: 30-59 days}
+          - {loan_id: cured, reporting_month: '2021-03-01', months_delinquent: 2, delinquency_status: 60-89 days}
+          - {loan_id: cured, reporting_month: '2021-04-01', months_delinquent: 0, delinquency_status: current}
+          # Pays off while delinquent; the payoff month is reported as current.
+          - {loan_id: paid_off, reporting_month: '2021-01-01', months_delinquent: 1, delinquency_status: 30-59 days}
+          - {loan_id: paid_off, reporting_month: '2021-02-01', months_delinquent: 0, delinquency_status: current}
+          # Foreclosed and the property sold.
+          - {loan_id: defaulted, reporting_month: '2021-01-01', months_delinquent: 3, delinquency_status: 90+ days}
+          - {loan_id: defaulted, reporting_month: '2021-02-01', months_delinquent: null, delinquency_status: REO}
+          - {loan_id: defaulted, reporting_month: '2021-03-01', months_delinquent: null, delinquency_status: REO}
+          # Still delinquent when the data ends.
+          - {loan_id: ongoing, reporting_month: '2021-01-01', months_delinquent: 0, delinquency_status: current}
+          - {loan_id: ongoing, reporting_month: '2021-02-01', months_delinquent: 1, delinquency_status: 30-59 days}
+          - {loan_id: ongoing, reporting_month: '2021-03-01', months_delinquent: 2, delinquency_status: 60-89 days}
+          # Two separate episodes.
+          - {loan_id: repeat, reporting_month: '2021-01-01', months_delinquent: 1, delinquency_status: 30-59 days}
+          - {loan_id: repeat, reporting_month: '2021-02-01', months_delinquent: 0, delinquency_status: current}
+          - {loan_id: repeat, reporting_month: '2021-03-01', months_delinquent: 1, delinquency_status: 30-59 days}
+          - {loan_id: repeat, reporting_month: '2021-04-01', months_delinquent: 0, delinquency_status: current}
+          # Delinquent on both sides of a missing month, so one episode.
+          - {loan_id: gap, reporting_month: '2021-01-01', months_delinquent: 3, delinquency_status: 90+ days}
+          - {loan_id: gap, reporting_month: '2021-03-01', months_delinquent: 5, delinquency_status: 90+ days}
+          - {loan_id: gap, reporting_month: '2021-04-01', months_delinquent: 0, delinquency_status: current}
+      - input: ref('dim_loans')
+        rows:
+          - {loan_id: cured, outcome: active, outcome_month: null}
+          - {loan_id: paid_off, outcome: paid off, outcome_month: '2021-02-01'}
+          - {loan_id: defaulted, outcome: defaulted, outcome_month: '2021-03-01'}
+          - {loan_id: ongoing, outcome: active, outcome_month: null}
+          - {loan_id: repeat, outcome: active, outcome_month: null}
+          - {loan_id: gap, outcome: active, outcome_month: null}
+    expect:
+      rows:
+        - {loan_id: cured, episode_number: 1, start_month: '2021-02-01', end_month: '2021-03-01', worst_delinquency_status: 60-89 days, outcome: cured, outcome_month: '2021-04-01', months_to_outcome: 2}
+        - {loan_id: paid_off, episode_number: 1, start_month: '2021-01-01', end_month: '2021-01-01', worst_delinquency_status: 30-59 days, outcome: paid off, outcome_month: '2021-02-01', months_to_outcome: 1}
+        - {loan_id: defaulted, episode_number: 1, start_month: '2021-01-01', end_month: '2021-03-01', worst_delinquency_status: REO, outcome: defaulted, outcome_month: '2021-03-01', months_to_outcome: 2}
+        - {loan_id: ongoing, episode_number: 1, start_month: '2021-02-01', end_month: '2021-03-01', worst_delinquency_status: 60-89 days, outcome: ongoing, outcome_month: null, months_to_outcome: null}
+        - {loan_id: repeat, episode_number: 1, start_month: '2021-01-01', end_month: '2021-01-01', worst_delinquency_status: 30-59 days, outcome: cured, outcome_month: '2021-02-01', months_to_outcome: 1}
+        - {loan_id: repeat, episode_number: 2, start_month: '2021-03-01', end_month: '2021-03-01', worst_delinquency_status: 30-59 days, outcome: cured, outcome_month: '2021-04-01', months_to_outcome: 1}
+        - {loan_id: gap, episode_number: 1, start_month: '2021-01-01', end_month: '2021-03-01', worst_delinquency_status: 90+ days, outcome: cured, outcome_month: '2021-04-01', months_to_outcome: 3}
+
+  - name: prepayment_rate_formula
+    model: prepayment_by_vintage
+    given:
+      - input: ref('fct_loan_months')
+        rows:
+          - {loan_id: paid_off, reporting_month: '2021-02-01', previous_upb: 100}
+          - {loan_id: active, reporting_month: '2021-02-01', previous_upb: 50}
+          - {loan_id: active, reporting_month: '2021-03-01', previous_upb: 50}
+          - {loan_id: defaulted, reporting_month: '2021-02-01', previous_upb: 30}
+          - {loan_id: matured, reporting_month: '2021-02-01', previous_upb: 20}
+          # First month, so no starting balance and not part of the pool.
+          - {loan_id: new, reporting_month: '2021-02-01', previous_upb: null}
+      - input: ref('dim_loans')
+        rows:
+          - {loan_id: paid_off, vintage_year: 2020, outcome: paid off, outcome_month: '2021-02-01'}
+          - {loan_id: active, vintage_year: 2020, outcome: active, outcome_month: null}
+          - {loan_id: defaulted, vintage_year: 2020, outcome: defaulted, outcome_month: '2021-02-01'}
+          - {loan_id: matured, vintage_year: 2020, outcome: matured, outcome_month: '2021-02-01'}
+          - {loan_id: new, vintage_year: 2020, outcome: active, outcome_month: null}
+    expect:
+      rows:
+        # Half the starting balance paid off: 1 - 0.5^12.
+        - {vintage_year: 2020, reporting_month: '2021-02-01', active_loans: 4, paid_off_loans: 1, starting_upb: 200, paid_off_upb: 100, smm: 0.5, cpr: 0.999755859375}
+        - {vintage_year: 2020, reporting_month: '2021-03-01', active_loans: 1, paid_off_loans: 0, starting_upb: 50, paid_off_upb: 0, smm: 0, cpr: 0}
