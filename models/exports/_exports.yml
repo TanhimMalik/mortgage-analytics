@@ -1,0 +1,15 @@
+models:
+  - name: export_prepayment
+    description: >-
+      prepayment_by_vintage written to exports/prepayment.csv for the dashboard, without dollar
+      totals. Months with fewer than min_cell_size active loans are left out.
+
+  - name: export_risk_bands
+    description: >-
+      risk_band_performance written to exports/risk_bands.csv for the dashboard. Bands with fewer
+      than min_cell_size loans are left out.
+
+  - name: export_delinquency_outcomes
+    description: >-
+      delinquency_outcomes written to exports/delinquency_outcomes.csv for the dashboard. Rows
+      with fewer than min_cell_size episodes are left out.

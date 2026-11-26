@@ -9,3 +9,11 @@ models:
       +materialized: table
     marts:
       +materialized: table
+    exports:
+      +materialized: external
+      +format: csv
+
+vars:
+  # Export rows built from fewer loans or episodes than this are left out, so no published
+  # number describes just a handful of loans.
+  min_cell_size: 10
