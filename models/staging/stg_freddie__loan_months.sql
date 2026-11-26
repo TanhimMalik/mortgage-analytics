@@ -14,6 +14,5 @@ select
     end as months_delinquent,
     delinquency_status = 'RA' as is_reo_acquisition,
     zero_balance_code,
-    cast(strptime(zero_balance_effective_date, '%Y%m') as date) as zero_balance_month,
     cast(zero_balance_removal_upb as decimal(12, 2)) as zero_balance_removal_upb
 from source

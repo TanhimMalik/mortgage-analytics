@@ -1,0 +1,26 @@
+models:
+  - name: dim_loans
+    description: One row per loan, with origination details, risk bands, and how the loan ended.
+    columns:
+      - name: loan_id
+        data_tests:
+          - unique
+          - not_null
+      - name: outcome
+        description: >-
+          active, paid off, defaulted (third-party sale, short sale or charge-off, or REO
+          disposition), or sold or repurchased (whole loan sale, reperforming loan sale, or defect
+          repurchase).
+      - name: outcome_month
+        description: Reporting month in which the loan's termination was reported. Null for active loans.
+
+  - name: fct_loan_months
+    description: One row per loan per month.
+    columns:
+      - name: delinquency_status
+        data_tests:
+          - not_null
+      - name: previous_delinquency_status
+        description: >-
+          Status in the prior calendar month. Null in a loan's first month and after a gap in
+          Freddie Mac's reporting.
