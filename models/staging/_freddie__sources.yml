@@ -1,0 +1,64 @@
+sources:
+  - name: freddie
+    description: >-
+      Freddie Mac Single-Family Loan-Level Dataset sample files. The files are pipe-delimited with
+      no header row, so column names follow the order in Freddie Mac's file layout.
+    tables:
+      - name: origination
+        description: One row per loan, as of origination.
+        config:
+          external_location: >-
+            read_csv('data/sample_orig_*.txt', delim = '|', header = false, all_varchar = true,
+            names = ['credit_score', 'first_payment_date', 'first_time_homebuyer_flag',
+            'maturity_date', 'msa', 'mi_pct', 'number_of_units', 'occupancy_status',
+            'original_cltv', 'original_dti', 'original_upb', 'original_ltv',
+            'original_interest_rate', 'channel', 'ppm_flag', 'amortization_type',
+            'property_state', 'property_type', 'postal_code', 'loan_id', 'loan_purpose',
+            'original_loan_term', 'number_of_borrowers', 'seller_name', 'super_conforming_flag',
+            'pre_harp_loan_id', 'special_eligibility_program', 'harp_indicator',
+            'property_valuation_method', 'interest_only_indicator', 'vantage_score'])
+        columns:
+          - name: loan_purpose
+            data_tests:
+              - accepted_values:
+                  arguments:
+                    values: ['P', 'C', 'N', 'R', '9']
+          - name: occupancy_status
+            data_tests:
+              - accepted_values:
+                  arguments:
+                    values: ['P', 'I', 'S', '9']
+          - name: property_type
+            data_tests:
+              - accepted_values:
+                  arguments:
+                    values: ['SF', 'PU', 'CO', 'MH', 'CP', '99']
+          - name: first_time_homebuyer_flag
+            data_tests:
+              - accepted_values:
+                  arguments:
+                    values: ['Y', 'N', '9']
+
+      - name: performance
+        description: One row per loan per month.
+        config:
+          external_location: >-
+            read_csv('data/sample_perf_*.txt', delim = '|', header = false, all_varchar = true,
+            names = ['loan_id', 'period', 'current_upb', 'delinquency_status', 'loan_age',
+            'remaining_months_to_maturity', 'defect_settlement_date', 'modification_flag',
+            'zero_balance_code', 'zero_balance_effective_date', 'current_interest_rate',
+            'current_non_interest_bearing_upb', 'last_paid_installment_date', 'mi_recoveries',
+            'net_sales_proceeds', 'non_mi_recoveries', 'total_expenses', 'legal_costs',
+            'maintenance_preservation_costs', 'taxes_insurance', 'miscellaneous_expenses',
+            'actual_loss', 'cumulative_modification_cost', 'interest_rate_step_indicator',
+            'payment_deferral_flag', 'estimated_ltv', 'zero_balance_removal_upb',
+            'delinquent_accrued_interest', 'delinquency_due_to_disaster',
+            'borrower_assistance_plan', 'current_period_modification_cost',
+            'current_interest_bearing_upb', 'mi_cancellation_indicator', 'servicer_name',
+            'bankruptcy_cramdown_costs'])
+        columns:
+          - name: zero_balance_code
+            data_tests:
+              - accepted_values:
+                  arguments:
+                    values: ['01', '02', '03', '09', '15', '16', '96']

@@ -1,0 +1,30 @@
+models:
+  - name: stg_freddie__loans
+    description: One row per loan. Freddie Mac's "not available" codes are converted to nulls.
+    columns:
+      - name: loan_id
+        data_tests:
+          - unique
+          - not_null
+      - name: vintage_year
+        description: Origination year, taken from the loan ID.
+        data_tests:
+          - not_null
+
+  - name: stg_freddie__loan_months
+    description: One row per loan per month.
+    columns:
+      - name: loan_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_freddie__loans')
+                field: loan_id
+      - name: reporting_month
+        data_tests:
+          - not_null
+      - name: months_delinquent
+        description: >-
+          Number of missed monthly payments, capped at 99. Null when the property was acquired
+          through foreclosure (REO).
