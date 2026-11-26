@@ -30,6 +30,34 @@ models:
           Status in the prior calendar month. Null in a loan's first month and after a gap in
           Freddie Mac's reporting.
 
+  - name: fct_delinquency_episodes
+    description: >-
+      One row per stretch of consecutive delinquent months (30+ days late or REO) in a loan's
+      history. A loan can have several episodes.
+    columns:
+      - name: start_month
+        description: First delinquent month of the episode.
+      - name: end_month
+        description: Last delinquent month of the episode.
+      - name: worst_delinquency_status
+        description: Most severe status reached during the episode.
+      - name: outcome
+        description: >-
+          cured (returned to current, by any route including a modification or payment deferral),
+          ongoing (still delinquent at the end of the data), or the loan's termination outcome if
+          it ended during the episode or in the month right after.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [cured, ongoing, paid off, matured, defaulted, sold or repurchased]
+      - name: outcome_month
+        description: >-
+          First current month for a cure, the loan's outcome month for a termination, null for an
+          ongoing episode.
+      - name: months_to_outcome
+        description: Months from the start of the episode to its outcome month.
+
   - name: prepayment_by_vintage
     description: >-
       One row per origination year per month. Prepayment counts only loans paid off in full
