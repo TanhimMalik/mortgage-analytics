@@ -8,7 +8,8 @@ models:
           - not_null
       - name: outcome
         description: >-
-          active, paid off, defaulted (third-party sale, short sale or charge-off, or REO
+          active, paid off (before the scheduled final payment), matured (paid off at or after the
+          scheduled final payment), defaulted (third-party sale, short sale or charge-off, or REO
           disposition), or sold or repurchased (whole loan sale, reperforming loan sale, or defect
           repurchase).
       - name: outcome_month
@@ -31,9 +32,9 @@ models:
 
   - name: prepayment_by_vintage
     description: >-
-      One row per origination year per month. Prepayment counts only loans paid off in full;
-      partial prepayments are not included. Loans that reach maturity are also counted as paid
-      off, but their balances are small by then.
+      One row per origination year per month. Prepayment counts only loans paid off in full
+      before their scheduled final payment. Partial prepayments (curtailments) are not included,
+      so these rates run lower than a conventional CPR, which counts all unscheduled principal.
     columns:
       - name: smm
         description: >-

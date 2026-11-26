@@ -33,6 +33,11 @@ select
     end as ltv_band,
     case
         when terminations.zero_balance_code is null then 'active'
+        -- Code 01 covers both early payoffs and loans that ran to their scheduled final payment.
+        when terminations.zero_balance_code = '01'
+            and terminations.outcome_month
+                >= loans.first_payment_month + to_months(loans.original_loan_term - 1)
+            then 'matured'
         when terminations.zero_balance_code = '01' then 'paid off'
         -- Third-party sale, short sale or charge-off, and REO disposition.
         when terminations.zero_balance_code in ('02', '03', '09') then 'defaulted'
