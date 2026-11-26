@@ -13,6 +13,5 @@ select
         else cast(delinquency_status as integer)
     end as months_delinquent,
     delinquency_status = 'RA' as is_reo_acquisition,
-    zero_balance_code,
-    cast(zero_balance_removal_upb as decimal(12, 2)) as zero_balance_removal_upb
+    zero_balance_code
 from source

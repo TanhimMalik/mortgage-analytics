@@ -20,7 +20,32 @@ models:
       - name: delinquency_status
         data_tests:
           - not_null
+      - name: previous_upb
+        description: >-
+          Balance at the end of the prior calendar month, which is the balance at the start of
+          this one. Null in a loan's first month and after a gap in Freddie Mac's reporting.
       - name: previous_delinquency_status
         description: >-
           Status in the prior calendar month. Null in a loan's first month and after a gap in
           Freddie Mac's reporting.
+
+  - name: prepayment_by_vintage
+    description: >-
+      One row per origination year per month. Prepayment counts only loans paid off in full;
+      partial prepayments are not included. Loans that reach maturity are also counted as paid
+      off, but their balances are small by then.
+    columns:
+      - name: smm
+        description: >-
+          Single monthly mortality: the starting balance of loans paid off this month divided by
+          the starting balance of all loans active this month.
+      - name: cpr
+        description: Conditional prepayment rate, the annualized SMM. 1 - (1 - smm)^12.
+
+  - name: risk_band_performance
+    description: One row per origination year, credit score band, and loan-to-value band.
+    columns:
+      - name: serious_delinquency_rate
+        description: Share of loans that were ever 90+ days delinquent or in REO.
+      - name: default_rate
+        description: Share of loans whose outcome is defaulted.

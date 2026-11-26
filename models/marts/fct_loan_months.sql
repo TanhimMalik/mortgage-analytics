@@ -7,8 +7,13 @@ with loan_months as (
             when months_delinquent = 1 then '30-59 days'
             when months_delinquent = 2 then '60-89 days'
             when months_delinquent >= 3 then '90+ days'
-        end as delinquency_status
+        end as delinquency_status,
+        -- A few loans skip months in Freddie Mac's reporting. Previous-month values are left null
+        -- across a gap instead of comparing against an older month.
+        date_diff('month', lag(reporting_month) over loan_history, reporting_month) = 1
+            as follows_previous_month
     from {{ ref('stg_freddie__loan_months') }}
+    window loan_history as (partition by loan_id order by reporting_month)
 )
 
 select
@@ -18,11 +23,9 @@ select
     current_upb,
     months_delinquent,
     delinquency_status,
-    -- A few loans skip months in Freddie Mac's reporting. Leave the previous status null across
-    -- a gap instead of comparing against an older month.
+    case when follows_previous_month then lag(current_upb) over loan_history end as previous_upb,
     case
-        when date_diff('month', lag(reporting_month) over loan_history, reporting_month) = 1
-            then lag(delinquency_status) over loan_history
+        when follows_previous_month then lag(delinquency_status) over loan_history
     end as previous_delinquency_status
 from loan_months
 window loan_history as (partition by loan_id order by reporting_month)
